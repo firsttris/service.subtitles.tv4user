@@ -443,7 +443,7 @@ def get_staffeln(id):
                 if video['season']:
                     # Wenn Gefunden Lsite für die Staffel alle Folgen
                     debug("YYY" + video['season'])
-                    if int(staffel.strip()) == int(video['season'].strip()):
+                    if staffel.strip() == video['season'].strip():
                         gefunden = 1
                         list_folgen(link)
                     else:
