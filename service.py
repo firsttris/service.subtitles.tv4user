@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 import sys
 import urllib
 import xbmc
@@ -24,7 +22,6 @@ icon = xbmc.translatePath('special://home/addons/' + addonID + '/icon.png')
 subdir = xbmc.translatePath(os.path.join(temp, 'subs', '')).decode("utf-8")
 subdownload = xbmc.translatePath(os.path.join(temp, 'download', '')).decode("utf-8")
 subtitlefile = "tv4user"
-
 mainUrl = "https://www.tv4user.de"
 
 # Anlegen von Directorys
@@ -75,7 +72,8 @@ def getSettings():
     pw = addon.getSetting("pw")
     global backNav
     if user == "" or pw == "":
-        xbmcgui.Dialog().notification("service.subtitle.tv4user", "username or pw is empty", xbmcgui.NOTIFICATION_ERROR, 5000);
+        xbmcgui.Dialog().notification("Tv4user.de", "Username or Pw is empty", xbmcgui.NOTIFICATION_ERROR,
+                                      5000);
         addon.openSettings()
         sys.exit()
 
@@ -99,7 +97,6 @@ def get_params(string=""):
             splitparams = pairsofparams[i].split('=')
             if (len(splitparams)) == 2:
                 param[splitparams[0]] = splitparams[1]
-
     return param
 
 
@@ -117,12 +114,10 @@ def login():
 def getUrl(url):
     r = session.get(url)
     debug("getUrl response: " + str(r))
-    # debug("URL: " + str(r.content))
     return r.content
 
-    # Titel Beeinigen
 
-
+# Titel Bereinigen
 def clean_serie(title):
     title = title.lower().replace('the ', '')
     title = title.replace('.', '')
@@ -317,9 +312,9 @@ def get_content_old(content, lang):
         untertitels = re.compile('<a href="([^"]+)">([^<]+)</a>', re.DOTALL).findall(entry)
         for untertitelnr in range(0, len(untertitels), 1):
             link = untertitels[untertitelnr][0]
-            filename = untertitels[untertitelnr][1]
-            debug("Filename: " + filename)
             if "Attachment" in link:
+                filename = untertitels[untertitelnr][1]
+                debug("Filename: " + filename)
                 untertitel_link_array.append(link)
                 episode_staffel = re.compile('.*S([0-9]+)E([0-9]+).+', re.DOTALL).findall(filename)
                 untertitel_qualitaet.append(qualitaet)
@@ -390,7 +385,7 @@ def oldthread(url):
 
 
 # Einen Link Erzeugen
-def addLink(name, url, mode, icon="", duration="", desc="", genre='', lang=""):
+def addLink(name, url, mode, icon="", duration="", desc="", genre="", lang=""):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode)
     ok = True
     iconl = ""
@@ -401,7 +396,7 @@ def addLink(name, url, mode, icon="", duration="", desc="", genre='', lang=""):
         sprache = translation(30111)
         iconl = "en"
     liz = xbmcgui.ListItem(label2=name, thumbnailImage=iconl, label=sprache)
-    debug("ICONXXX:'" + icon + "'")
+    debug("ICON:" + icon)
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz)
     return ok
 
@@ -430,19 +425,18 @@ def get_staffeln(id):
     for i in range(1, len(spl), 1):
         entry = spl[i]
         if "[Untertitel]" in entry:
-            debug("Get Staffeln Entry: "+entry)
+            debug("Get Staffeln Entry: " + entry)
             match = re.compile('<a href="([^"]+)">(.+)[\ ]+-[\ ]+Staffel ([0-9]+)[^<]+</a>', re.DOTALL).findall(entry)
             staffelnFound = len(match)
-            debug("MatchSize: "+str(staffelnFound))
+            debug("MatchSize: " + str(staffelnFound))
             if staffelnFound == 0:
                 match = re.compile('<a href="([^"]+)">(.+)[\ ]+-[\ ]+(Miniserie)', re.DOTALL).findall(
                     entry)
-                debug("New Match: "+str(match))
+                debug("New Match: " + str(match))
             for link, dummy, staffel in match:
-                debug("suche staffel:" + video['season'] + "X")
                 if video['season']:
                     # Wenn Gefunden Lsite für die Staffel alle Folgen
-                    debug("YYY" + video['season'])
+                    debug("Season" + video['season'])
                     if staffel.strip() == video['season'].strip():
                         gefunden = 1
                         list_folgen(link)
@@ -471,6 +465,7 @@ def search():
     # Suche Serie
     serien_complete, ids, serien = lies_serien()
     show = clean_serie(video['tvshow'])
+    debug("Show: " + show)
     # Wenn keine Serien Gibt es error=1 anosnten wird die ID rausgesucht
     if not show == '':
         try:
@@ -519,7 +514,6 @@ def resivefile():
         if len(match) > 0:
             video['season'] = match[0][1]
             video['episode'] = match[0][2]
-
     video['release'] = ""
     if "-" in fileName:
         video['release'] = (fileName.split("-")[-1]).lower()
@@ -545,11 +539,6 @@ def resivefile():
     video['tvshow'] = title
 
 
-# Parameter einlese
-params = get_params()
-getSettings()
-
-
 # Alle Temporaeren files loeschen bevor ein neuer Untertitel Kommt
 def clearSubTempDir(pfad):
     files = os.listdir(pfad)
@@ -560,27 +549,25 @@ def clearSubTempDir(pfad):
             pass
 
 
+# Download url to directory
 def download_url(url, directory):
     headers = {'user-agent': 'Mozilla'}
     r = session.get(url, headers=headers, stream=True)
-    debug("download_url response: " + str(r))
-    debug("status Code: "+str(r.status_code));
+    debug("download_url status Code: " + str(r.status_code));
     if r.status_code == 403:
-        xbmcgui.Dialog().notification("service.subtitle.tv4user", "username or pw is wrong", xbmcgui.NOTIFICATION_ERROR, 5000);
+        xbmcgui.Dialog().notification("Tv4user.de", "Username or Pw is wrong", xbmcgui.NOTIFICATION_ERROR,
+                                      5000);
         addon.openSettings()
         sys.exit()
-
     params = cgi.parse_header(
         r.headers.get('Content-Disposition', ''))[-1]
     if 'filename' not in params:
         print('download_url Could not find a filename')
-
     filename = os.path.basename(params['filename'])
     abs_path = os.path.join(directory, filename)
     with open(abs_path, 'wb') as target:
         r.raw.decode_content = True
         shutil.copyfileobj(r.raw, target)
-
     return filename
 
 
@@ -588,12 +575,9 @@ def download_url(url, directory):
 def setSubtitle(subUrl):
     subtitle_list = []
     filelist = []
-    debug("SUB: " + subUrl)
-
+    debug("Subtitle URL: " + subUrl)
     filename = download_url(subUrl, subdownload)
-
     fileLocation = subdownload + filename
-
     xbmc.executebuiltin("XBMC.Extract(" + fileLocation + ", " + subdir + ")", True)
     for file in xbmcvfs.listdir(subdir)[1]:
         filelist.append(file)
@@ -606,13 +590,14 @@ def setSubtitle(subUrl):
         listitem = xbmcgui.ListItem(label=sub)
     else:
         for sub in subtitle_list:
-            debug("XXYX: " + sub)
             listitem = xbmcgui.ListItem(label=sub)
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=sub, listitem=listitem, isFolder=False)
     xbmcplugin.endOfDirectory(addon_handle)
 
 
-# STARTZ
+# START
+params = get_params()
+getSettings()
 login()
 global video
 video = {}
@@ -630,14 +615,8 @@ if video['title'] == "":
     video['title'] = xbmc.getInfoLabel("VideoPlayer.Title")  # no original title, get just Title
 # Fehlende Daten aus File
 resivefile()
-
 url = urllib.unquote_plus(params.get('url', ''))
-
 if params['action'] == 'search':
     search()
-
 if params['action'] == 'download':
     setSubtitle(url)
-
-
-# xbmc.executebuiltin('runaddon(script.tv4user)')
