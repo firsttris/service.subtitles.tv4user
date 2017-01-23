@@ -74,6 +74,10 @@ def getSettings():
     global pw
     pw = addon.getSetting("pw")
     global backNav
+    if user == "" or pw == "":
+        xbmcgui.Dialog().notification("service.subtitle.tv4user", "username or pw is empty", xbmcgui.NOTIFICATION_ERROR, 5000);
+        addon.openSettings()
+        sys.exit()
 
 
 # Url Parameter Einlesen
@@ -560,6 +564,11 @@ def download_url(url, directory):
     headers = {'user-agent': 'Mozilla'}
     r = session.get(url, headers=headers, stream=True)
     debug("download_url response: " + str(r))
+    debug("status Code: "+str(r.status_code));
+    if r.status_code == 403:
+        xbmcgui.Dialog().notification("service.subtitle.tv4user", "username or pw is wrong", xbmcgui.NOTIFICATION_ERROR, 5000);
+        addon.openSettings()
+        sys.exit()
 
     params = cgi.parse_header(
         r.headers.get('Content-Disposition', ''))[-1]
@@ -602,11 +611,6 @@ def setSubtitle(subUrl):
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=sub, listitem=listitem, isFolder=False)
     xbmcplugin.endOfDirectory(addon_handle)
 
-
-# Wenn keine Kennung einegtragen ist diese Verlangen
-while (user == "" or pw == ""):
-    addon.openSettings()
-    getSettings()
 
 # STARTZ
 login()
