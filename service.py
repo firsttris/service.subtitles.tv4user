@@ -113,7 +113,7 @@ def login():
 def getUrl(url):
     r = session.get(url)
     debug("getUrl response: " + str(r))
-    debug("URL: " + str(r.content))
+    # debug("URL: " + str(r.content))
     return r.content
 
     # Titel Beeinigen
@@ -426,7 +426,14 @@ def get_staffeln(id):
     for i in range(1, len(spl), 1):
         entry = spl[i]
         if "[Untertitel]" in entry:
+            debug("Get Staffeln Entry: "+entry)
             match = re.compile('<a href="([^"]+)">(.+)[\ ]+-[\ ]+Staffel ([0-9]+)[^<]+</a>', re.DOTALL).findall(entry)
+            staffelnFound = len(match)
+            debug("MatchSize: "+str(staffelnFound))
+            if staffelnFound == 0:
+                match = re.compile('<a href="([^"]+)">(.+)[\ ]+-[\ ]+(Miniserie)', re.DOTALL).findall(
+                    entry)
+                debug("New Match: "+str(match))
             for link, dummy, staffel in match:
                 debug("suche staffel:" + video['season'] + "X")
                 if video['season']:
