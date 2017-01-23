@@ -578,6 +578,8 @@ def setSubtitle(subUrl):
     debug("Subtitle URL: " + subUrl)
     filename = download_url(subUrl, subdownload)
     fileLocation = subdownload + filename
+    xbmcgui.Dialog().notification("Tv4user.de", filename, xbmcgui.NOTIFICATION_INFO,
+                                  5000);
     xbmc.executebuiltin("XBMC.Extract(" + fileLocation + ", " + subdir + ")", True)
     for file in xbmcvfs.listdir(subdir)[1]:
         filelist.append(file)
